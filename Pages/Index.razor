@@ -1,0 +1,63 @@
+@page "/"
+@using System.ComponentModel.DataAnnotations
+<div style="width:700px;border-style:solid;border-color:darkgray">
+<EditForm Model="@InputValues" OnValidSubmit="DoSubmit" OnInvalidSubmit="NoSubmit" >
+    <DataAnnotationsValidator/>
+    <!-- <ValidationSummary style="font-weight:bold;color:red"/> -->
+    <table>
+    <tr>
+        <td>氏名：</td><td><InputText @bind-Value="InputValues.Name"/></td>
+        <td><ValidationMessage For="@(()=>InputValues.Name)" class="validation-message"/></td>
+    </tr>
+    <tr>
+        <td colspan="2">希望国：</td>
+        <td><ValidationMessage For="@(()=>InputValues.Country)" class="validation-message"/></td>
+    </tr>
+    <InputRadioGroup @bind-Value="InputValues.Country">
+        @foreach(var itm in Enum.GetValues(typeof(Countries))) {
+            <tr>
+                <td colspan="3"><InputRadio Value="itm"/>@itm</td>
+            </tr>
+        }
+    </InputRadioGroup>
+    <tr>
+        <td colspan="2"><InputCheckbox @bind-Value="InputValues.IsOK"/>添付の条項に同意します。</td>
+        <td><ValidationMessage For="@(()=>InputValues.IsOK)" class="validation-message"/></td>
+    </tr>
+    </table>
+    <br/>
+    <button class="btn btn-primary" type="submit">送信</button>
+</EditForm>
+<br/>
+</div>
+
+<pre style="font-weight:bold;color:red">@Mesg</pre>
+
+@code {
+
+    protected FormItems InputValues = new FormItems();
+    protected string Mesg;
+
+    protected void DoSubmit() {
+        Mesg = "Do Submit Called\n";
+        Mesg += $"Name={InputValues.Name}\n";
+        Mesg += $"Country={InputValues.Country}\n";
+        Mesg += $"I Agree={InputValues.IsOK}";
+    }
+    protected void NoSubmit() {
+        Mesg = "No Submit Called";
+    }
+
+    public enum Countries { Japan, USA, China, UK }
+    public class FormItems {
+        [Required(ErrorMessage = "氏名は必須入力です")]
+        [StringLength(10,ErrorMessage = "氏名は10文字以内です")]
+        public string Name { get; set; }
+        [Required(ErrorMessage = "希望国は必須選択項目です。")]
+        public Countries? Country { get; set; } = null;
+        //[Required(ErrorMessage = "同意が必要です。")]
+        [Range(typeof(bool),"true","true",
+            ErrorMessage = "同意が必要です。")]
+        public bool IsOK { get; set; }
+    }
+}
